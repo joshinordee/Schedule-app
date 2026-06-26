@@ -28,11 +28,24 @@ def get_tool_schemas():
     for tool in tools:
         schema = tool.model_json_schema()
 
+        # Extract specific Gemini OpenAPI parameters
+        properties = {}
+        for prop, prop_val in schema.get("properties", {}).items():
+            properties[prop] = types.Schema(
+                type=prop_val.get("type", "string").upper(),
+                description=prop_val.get("description", "")
+            )
+
+        extracted_params = types.Schema(
+            type=types.Type.OBJECT,
+            properties=properties,
+            required=schema.get("required", [])
+        )
         declarations.append(
             types.FunctionDeclaration(
-                name=schema["title"],
-                description=f"Executes the {schema['title']} operation on Google Calendar",
-                parameters=schema
+                name=tool.__name__,
+                description=f"Executes the {tool.__name__} operation on Google Calendar",
+                parameters=extracted_params
             )
         )
     return declarations
