@@ -106,6 +106,8 @@ If required information is missing, ask targeted follow-up questions.
 
 Do not create placeholder events unless explicitly requested.
 
+If an end time for an event is not specify ask for one.
+
 # EVENT MODIFICATION
 
 Before modifying an event:

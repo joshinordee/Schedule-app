@@ -4,18 +4,18 @@ from google.genai import types
 class CreateEvent(BaseModel):
     summary: str = Field(description="Summary of the created event")
     start_time: str = Field(description="Starting time of the event in ISO 8601 format")
-    end_time: str | None = Field(description="Ending time of the event in ISO 8601 format")
-    location: str | None = Field(description="Location of the event")
-    guests: str | None = Field(description="Specified guests for the event")
+    end_time: str = Field(description="Ending time of the event in ISO 8601 format")
+    location: str | None = Field(default=None, description="Location of the event")
+    guests: str | None = Field(default=None, description="Specified guests for the event")
 
 class UpdateEvent(BaseModel):
     summary: str = Field(description="Updated summary of the event")
     previous_start_time: str = Field(description="Original starting time of the event in ISO 8601 format")
-    previous_end_time: str | None = Field(description="Original ending time of the event in ISO 8601 format")
-    new_start_time: str | None = Field(description="Updated starting time of the event in ISO 8601 format")
-    new_end_time: str | None = Field(description="Updated starting time of the event in ISO 8601 format")
-    location: str | None = Field(description="Location of the event")
-    guests: str | None = Field(description="Specified guests for the event")
+    previous_end_time: str | None = Field(default=None, description="Original ending time of the event in ISO 8601 format")
+    new_start_time: str | None = Field(default=None, description="Updated starting time of the event in ISO 8601 format")
+    new_end_time: str | None = Field(default=None, description="Updated starting time of the event in ISO 8601 format")
+    location: str | None = Field(default=None, description="Location of the event")
+    guests: str | None = Field(default=None, description="Specified guests for the event")
 
 class DeleteEvent(BaseModel):
     summary: str = Field(description="Updated summary of the event")
@@ -28,14 +28,34 @@ def get_tool_schemas():
     for tool in tools:
         schema = tool.model_json_schema()
 
-        # Extract specific Gemini OpenAPI parameters
         properties = {}
+        # Iterate through properties to extract the types
         for prop, prop_val in schema.get("properties", {}).items():
-            properties[prop] = types.Schema(
-                type=prop_val.get("type", "string").upper(),
-                description=prop_val.get("description", "")
-            )
+            # Required types like summary: str
+            if "type" in prop_val:
+                prop_type = prop_val["type"]
+            # For optional types like location: str | None
+            elif "anyOf" in prop_val:
+                prop_type = "string"
 
+                for option in prop_val["anyOf"]:
+                    option_type = option.get("type")
+
+                    if option_type == "null":
+                        continue
+                    
+                    if option_type:
+                        prop_type = option_type
+                        break
+            else:
+                prop_type = "string"
+
+            # Create OpenAPI property object
+            properties[prop] = {
+                "type": prop_type.upper(),
+                "description": prop_val.get("description", "")
+            }
+        # Build parameters object
         extracted_params = types.Schema(
             type=types.Type.OBJECT,
             properties=properties,
