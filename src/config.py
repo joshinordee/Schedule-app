@@ -1,15 +1,19 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import find_dotenv
+from pydantic import SecretStr
+
 
 class Settings(BaseSettings):
-    gemini_api_key: str
+    database_url: SecretStr
+    token_encryption_key: SecretStr
+
 
     model_config = SettingsConfigDict(
-        env_file=find_dotenv(),
+        env_file=".env",
+        env_file_encoding="utf-8",
         extra="ignore"
-
     )
+
 
 @lru_cache
 def get_settings() -> Settings:
