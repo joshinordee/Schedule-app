@@ -4,7 +4,8 @@ from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy import (
     UniqueConstraint, 
     Uuid, 
-    String, 
+    String,
+    Text,
     DateTime, 
     func, 
     LargeBinary, 
@@ -47,13 +48,14 @@ class ProviderAccount(Base):
         SQLEnum(
             ProviderName, 
             name="provider_name",
+            # So SQlAlchemy uses the enums value and not its name
             values_callable=lambda enum: [member.value for member in enum]
         )
     )
     provider_account_id: Mapped[str] = mapped_column(String(300))
     account_email: Mapped[str] = mapped_column(String(300))
-    access_token: Mapped[bytes] = mapped_column(LargeBinary)
-    refresh_token: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    access_token: Mapped[str] = mapped_column(Text)
+    refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     scopes: Mapped[list[str]] = mapped_column(MutableList.as_mutable(ARRAY(String(500))))
     created_at: Mapped[datetime] = mapped_column(
