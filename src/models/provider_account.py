@@ -8,7 +8,6 @@ from sqlalchemy import (
     Text,
     DateTime, 
     func, 
-    LargeBinary, 
     ARRAY, 
     ForeignKey, 
     Enum as SQLEnum
