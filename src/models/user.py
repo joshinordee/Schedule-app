@@ -27,7 +27,7 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now()
     )
-    provider_acounts: Mapped[list["ProviderAccount"]] = relationship(
+    provider_accounts: Mapped[list["ProviderAccount"]] = relationship(
         "ProviderAccount",
         back_populates="user",
         cascade="all, delete-orphan",

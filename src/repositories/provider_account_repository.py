@@ -113,6 +113,7 @@ class ProviderAccountRepository:
                 existing_account.refresh_token = creds.refresh_token
             existing_account.expires_at = creds.expires_at
             existing_account.scopes = creds.scopes
+            existing_account.needs_reauth = False
             account = existing_account
             await self.session.flush()
         
@@ -135,4 +136,13 @@ class ProviderAccountRepository:
         
         account.access_token = access_token
         account.expires_at = expires_at
+        await self.session.flush()
+
+    async def mark_needs_reauth(self, account_id: UUID) -> None:
+        account = await self.get_by_id(account_id)
+
+        if account is None:
+            raise ProviderAccountNotFound(account_id=account_id)
+        
+        account.needs_reauth = True
         await self.session.flush()

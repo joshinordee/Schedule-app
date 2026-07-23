@@ -2,6 +2,7 @@ from src.db.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy import (
+    Boolean,
     UniqueConstraint, 
     Uuid, 
     String,
@@ -10,7 +11,8 @@ from sqlalchemy import (
     func, 
     ARRAY, 
     ForeignKey, 
-    Enum as SQLEnum
+    Enum as SQLEnum,
+    false
 )
 from enum import Enum
 import uuid
@@ -65,6 +67,11 @@ class ProviderAccount(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now()
+    )
+    needs_reauth: Mapped[bool] = mapped_column(
+        Boolean, 
+        nullable=False,
+        server_default=false()
     )
     user: Mapped["User"] = relationship(
         "User",
